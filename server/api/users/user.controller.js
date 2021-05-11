@@ -1,7 +1,9 @@
 const { create, getUserById, getUserByEmail } = require('./user.service')
 
 const { genSaltSync, hashSync, compareSync } = require('bcrypt')
-const { sign } = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
+
+let tokensList = {}
 
 module.exports = {
   createUser: (req, res) => {
@@ -45,6 +47,7 @@ module.exports = {
 
   signin: (req, res) => {
     const { email, password } = req.body
+    // const user = users.find(u => { return u.email === email && u.password === password });
     getUserByEmail(email, (err, results) => {
       if (err) {
         console.log(err);
@@ -58,14 +61,20 @@ module.exports = {
       const result = compareSync(password, results.password)
       if (result) {
         results.password = undefined
-        const jsontoken = sign({ result: results }, 'qwe1234', {
+        const bearer_token = jwt.sign({ result: results }, process.env.JWT_ACCESS_SECRET, {
           expiresIn: '10m',
         })
-        return res.json({
+        const refresh_token = jwt.sign({ result: results }, process.env.JWT_REFRESH_SECRET, {
+          expiresIn: '10m',
+        })
+        const response = {
           success: true,
           message: 'Login successfully',
-          token: jsontoken
-        })
+          bearer_token,
+          refresh_token
+        }
+        tokensList[bearer_token] = response
+        res.status(200).json(response)
       } else {
         return res.json({
           success: false,
@@ -73,6 +82,38 @@ module.exports = {
         })
       }
     })
+  },
 
-  }
+  refreshToken: (req, res) => {
+    const { email, refresh_token } = req.body
+    if ((refresh_token) && (refresh_token in tokensList)) {
+      const user = {
+        email
+      }
+      const token = jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '10m' })
+      const response = {
+        "token": token,
+      }
+      console.log(response);
+      tokensList[refresh_token] = token
+      res.status(200).json(response);
+    } else {
+      res.status(404).send('Invalid request')
+    }
+  },
+
+  logout: (req, res) => {
+    const { token } = req.body
+    if (token in tokensList) {
+      delete tokensList[token]
+      res.json({
+        success: true,
+        message: 'Logout successfully'
+      })
+    }
+    res.json({
+      success: false,
+      message: 'Logout unsuccessfully'
+    })
+  },
 }

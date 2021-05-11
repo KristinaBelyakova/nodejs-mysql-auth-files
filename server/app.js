@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
 const userRouter = require('./api/users/user.router')
+const fileRouter = require('./api/files/file.router')
+const { verifyBearerToken} = require('./auth/token_validation')
 
 var corsOptions = {
   origin: "http://localhost:8081"
@@ -17,5 +19,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', userRouter)
+app.use('/file', fileRouter)
 
 module.exports = app

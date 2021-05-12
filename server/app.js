@@ -4,7 +4,6 @@ const cors = require("cors");
 const app = express();
 const userRouter = require('./api/users/user.router')
 const fileRouter = require('./api/files/file.router')
-const { verifyBearerToken} = require('./auth/token_validation')
 
 var corsOptions = {
   origin: "http://localhost:8081"

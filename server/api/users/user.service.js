@@ -4,7 +4,7 @@ module.exports = {
   create: (data, callBack) => {
     pool.query(
       `insert into registration(name, email, phone, password)
-      values(?,?,?,?)`,
+          values(?,?,?,?)`,
       [
         data.name,
         data.email,

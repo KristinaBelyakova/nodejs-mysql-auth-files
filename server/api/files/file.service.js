@@ -3,12 +3,12 @@ const pool = require('../../config/db.config')
 module.exports = {
   createFile: (data, callBack) => {
     pool.query(
-      `insert into files(fileName, extension, mymeType, size, uploadDate)
+      `insert into files(fileName, extension, mimeType, size, uploadDate)
          values(?,?,?,?,?)`,
       [
-        data.fileName,
-        data.extension,
-        data.mymeType,
+        data.filename,
+        data.encoding,
+        data.mimetype,
         data.size,
         data.uploadDate
       ],
@@ -21,10 +21,13 @@ module.exports = {
     )
   },
 
-  getFiles: (callBack) => {
+  getFiles: (page, list_size, callBack) => {
     pool.query(
-      `select id, fileName, extension, mymeType, size, uploadDate from files`,
-      [],
+      `select id, fileName, extension, mimeType, size, uploadDate from files limit ?, ?`,
+      [
+        (page - 1) * list_size,
+        parseInt(list_size)
+      ],
       (error, results, fields) => {
         if (error) {
           return callBack(error)
@@ -36,7 +39,7 @@ module.exports = {
 
   getFileById: (id, callBack) => {
     pool.query(
-      `select id, fileName, extension, mymeType, size, uploadDate from files where id = ?`,
+      `select id, fileName, extension, mimeType, size, uploadDate from files where id = ?`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -48,9 +51,8 @@ module.exports = {
   },
 
   updateFile: (data, callBack) => {
-    console.log(data);
     pool.query(
-      `update files set fileName=?, extension=?, mymeType=?, size=?, uploadDate=? where id=?`,
+      `update files set fileName=?, extension=?, mimeType=?, size=?, uploadDate=? where id=?`,
       [
         data.fileName,
         data.extension,

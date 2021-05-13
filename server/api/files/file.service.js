@@ -10,7 +10,7 @@ module.exports = {
         data.encoding,
         data.mimetype,
         data.size,
-        data.uploadDate
+        Date.now()
       ],
       (error, results, fields) => {
         if (error) {
@@ -50,16 +50,16 @@ module.exports = {
     )
   },
 
-  updateFile: (data, callBack) => {
+  updateFile: (id, data, callBack) => {
     pool.query(
       `update files set fileName=?, extension=?, mimeType=?, size=?, uploadDate=? where id=?`,
       [
-        data.fileName,
-        data.extension,
-        data.mymeType,
+        data.filename,
+        data.encoding,
+        data.mimetype,
         data.size,
-        data.uploadDate,
-        data.id
+        Date.now(),
+        id
       ],
       (error, results, fields) => {
         if (error) {
@@ -70,10 +70,10 @@ module.exports = {
     )
   },
 
-  deleteFile: (data, callBack) => {
+  deleteFile: (id, callBack) => {
     pool.query(
       `delete from files where id=?`,
-      [data.id],
+      [id],
       (error, results, fields) => {
         if (error) {
           return callBack(error)

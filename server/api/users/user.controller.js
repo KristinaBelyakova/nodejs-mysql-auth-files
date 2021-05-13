@@ -47,7 +47,6 @@ module.exports = {
 
   signin: (req, res) => {
     const { email, password } = req.body
-    // const user = users.find(u => { return u.email === email && u.password === password });
     getUserByEmail(email, (err, results) => {
       if (err) {
         console.log(err);

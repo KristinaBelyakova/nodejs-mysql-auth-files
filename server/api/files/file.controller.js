@@ -46,7 +46,7 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          message: 'File Not Found'
+          message: 'File not found'
         })
       }
       return res.json({
@@ -57,15 +57,33 @@ module.exports = {
   },
 
   updateFile: (req, res) => {
-    const body = req.body
-    updateFile(body, (err, results) => {
+    const id = req.params.id
+    getFileById(id, (err, results) => {
       if (err) {
         console.log(err);
-        return false;
+        return res.json({
+          success: false,
+          message: 'File not found'
+        });
       }
-      return res.status(200).json({
-        success: true,
-        message: 'Updated successfully'
+      if (results !== undefined) {
+        const filename = results.fileName
+        updateFile(id, req.file, (err, results) => {
+          if (err) {
+            console.log(err);
+            return;
+          }
+          fs.rmdir(uploadFolder + filename, { recursive: true }, (err) => {
+            console.log(err)
+          });
+          return res.status(200).json({
+            success: true,
+            message: 'Updated successfully'
+          })
+        })
+      }
+      return res.json({
+        message: 'File not found'
       })
     })
   },
@@ -83,15 +101,25 @@ module.exports = {
   },
 
   deleteFile: (req, res) => {
-    const data = req.body
-    deleteFile(data, (err, results) => {
+    const id = req.params.id
+    getFileById(id, (err, results) => {
       if (err) {
         console.log(err);
-        return false;
+        return;
       }
-      return res.json({
-        success: true,
-        message: 'Deleted successfully'
+      const filename = results.fileName
+      deleteFile(id, (err, results) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        fs.rmdir(uploadFolder + filename, { recursive: true }, (err) => { 
+          console.log(err) 
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'Deleted successfully'
+        })
       })
     })
   }
